@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            # Route: /client/** -> MY-CLIENT service
+            - id: client-route
+              uri: lb://MY-CLIENT        
+              predicates:
+                - Path=/client/**          # Match all paths starting with /client/
+              filters:
+                - StripPrefix=1            # Remove /client prefix before forwarding
+
+            # Route: /clientb/** -> eureka-clientb service
+            - id: clientb-route
+              uri: lb://eureka-clientb       
+              predicates:
+                - Path=/clientb/**          # Match all paths starting with /clientb/
+              filters:
+                - StripPrefix=1            # Remove /clientb prefix before forwarding
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+# Logging for debugging routes
+logging:
+  level:
+    org.spring: DEBUG
